@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<button onclick="add()">新增</button>
+<table>
+
+
+
+</table>
+<hr>
+<div id="input" style="width: 400px ;height: 400px;">
+    empno:<input type="text" id="empno"><br>
+    ename:<input type="text" id="ename"><br>
+    job:<input type="text" id="job"><br>
+    hiredate: <input type="date" id="hiredate"><br>
+    sal: <input type="text" id="sal"><br>
+    <input type="button" value="提交修改" id="sub_upd">
+    <button id="sub_add" onclick="add()">添加</button>
+</div>
+
+
+
+<script src="js/jquery-3.2.1.js"></script>
+<script>
+
+    $("#input").hide();
+    //查询
+
+    $(()=> {
+        selAll();
+
+            //修改
+            $("#sub_upd").click(() => {
+                console.log($("#hiredate").val())
+                $.ajax({
+                    type: "get",
+                    url: "upd",
+                    data: {
+                        "empno": $("#empno").val(),
+                        "ename": $("#ename").val(),
+                        "job": $("#job").val(),
+                        "hiredate":$("#hiredate").val(),
+                        "sal": $("#sal").val(),
+                    },
+                    dataType: "json",
+                    success: (data) => {
+                        console.log(data + "修改成功");
+                        alert("修改成功")
+                        $("#input").hide();
+                        selAll();
+                    }
+                })
+            })
+
+
+    })
+
+
+    //查询所有
+    function selAll() {
+
+        $.ajax({
+            type: "get",
+            url: "selAll",
+            data: {},
+            dataType: "json",
+            success: (function (data) {
+                var str = `
+ <tr>
+
+        <td>empno</td>
+        <td>ename</td>
+        <td>job</td>
+        <td>hiredate</td>
+        <td>sal</td>
+        <td>操作</td>
+
+    </tr>`;
+                $.each(data, function (index, obj) {
+
+                    str += `<tr>
+        <td>${obj.empno}</td>
+        <td>${obj.ename}</td>
+        <td>${obj.job}</td>
+        <td>${obj.hiredate}</td>
+        <td>${obj.sal}</td>
+        <td><button onclick="return comfie(${obj.empno},'del')">删除</button><button onclick="return comfie(${obj.empno},'selById')">修改</button></td>
+
+    </tr>`;
+
+                    $("table").html(str);
+
+                })
+            })
+
+        })
+    }
+
+
+
+
+
+    //删除
+
+    function comfie(empno,type) {
+
+        if (type=="del"){
+           if(confirm("确认删除吗")) {
+               $.ajax({
+                   type:"get",
+                   url:"del",
+                   data:{"empno":empno},
+                   dataType:"json",
+                   success:(data)=>{
+                       if(data>0){
+                           alert("删除成功")
+                           selAll();
+                       }
+                   }
+               })
+           }else{
+               return false;
+           }
+
+        }else if(type=="selById"){
+            $("#sub_add").hide();
+            $.ajax({
+                type:"get",
+                url:"selById",
+                data:{"empno":empno},
+                dataType:"json",
+                success:(data)=>{
+                    $("#empno").val(data.empno);
+                    $("#ename").val(data.ename);
+                    $("#job").val(data.job);
+                    $("#hiredate").val(data.hiredate);
+                    $("#sal").val(data.sal);
+                    $("#input").show();
+                }
+            })
+        }
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+    //新增
+
+    function add() {
+        $("#input").show();
+        $("#sub_upd").hide();
+        $.ajax({
+            type:"get",
+            url:"add",
+            data:{
+                "empno":$("#empno").val(),
+                "ename":$("#ename").val(),
+                "job":$("#job").val(),
+                "hiredate":$("#hiredate").val(),
+                "sal":$("#sal").val(),
+            },
+            dataType:"json",
+            success:(data)=>{
+                console.log(data);
+                alert("添加成功")
+                selAll();
+            }
+        })
+
+    }
+
+
+
+</script>
+</body>
+</html>
